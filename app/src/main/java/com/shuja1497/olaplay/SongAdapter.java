@@ -6,11 +6,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -19,10 +22,13 @@ import static android.content.ContentValues.TAG;
  * Created by shuja1497 on 12/20/17.
  */
 
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder>
+
+    implements Filterable{
 
     private List<Song> songList;
     private Context context;
+    private List<Song> mFilteredList;
 
 
     class SongViewHolder extends RecyclerView.ViewHolder {
@@ -42,6 +48,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
     public SongAdapter(List<Song> songList, Context context){
         this.songList = songList;
         this.context = context;
+        this.mFilteredList = songList;
 
     }
 
@@ -67,7 +74,44 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder
 
     @Override
     public int getItemCount() {
-        return songList.size();
+        return mFilteredList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    mFilteredList = songList;
+                } else {
+                    List<Song> filteredList = new ArrayList<>();
+                    for (Song row : songList) {
+
+                        // name match condition. this might differ depending on your requirement
+                        // here we are looking for name or phone number match
+                        if (row.getSong().toLowerCase().contains(charString.toLowerCase()) || row.getArtists().contains(charSequence)) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    mFilteredList = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mFilteredList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                mFilteredList = (ArrayList<Song>) filterResults.values;
+
+                // refresh the list with filtered data
+                notifyDataSetChanged();
+            }
+        };
     }
 
 }
