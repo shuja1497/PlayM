@@ -1,5 +1,6 @@
 package com.shuja1497.olaplay;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 
 import android.support.design.widget.FloatingActionButton;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     List<Song> songList;
 //
     private String TAG = "MainActivity";
+    private ProgressDialog pDialog;
 //    private ListView lv;
 //    ArrayList<HashMap<String, String>> songList;
 
@@ -98,17 +100,30 @@ public class MainActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        //dismissing pDialog
+                        pDialog.dismiss();
+
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
                 Toast.makeText(MainActivity.this,"ERROR:"+error.getMessage(), Toast.LENGTH_LONG).show();
+                //dismissing pDialog
+                pDialog.dismiss();
             }
         });
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
 
+        //pDialog started
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading Songs");
+        pDialog.setIndeterminate(false);
+        pDialog.setMax(100);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pDialog.setCancelable(true);
+        pDialog.show();
     }
 
 //    private class GetSongs extends AsyncTask<Void, Void, Void>{
